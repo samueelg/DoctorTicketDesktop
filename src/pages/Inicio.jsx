@@ -1,17 +1,24 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { PhoneIcon } from "@heroicons/react/24/solid";
 import Button from "../components/atoms/Button";
 import { useNavigate } from "react-router-dom";
 import LoadingScreen from "../components/layout/LoadingScreen";
 import { Toast } from "primereact/toast";
 import { notificacaoService } from "../services/notificacaoService";
+import { useLigacao } from "../components/context/LigacaoContext";
 
 
 export default function Inicio() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const { status } = useLigacao();
+  const statusTexto = {
+    'wait': 'Aguardando Ligação...',
+    'ringing': 'Ramal tocando...',
+    'up': 'Ligação em andamento...'
+  }
 
-  
+
   async function criarNotificacao(e) {
     //Implementar método de finalizaLigacao, que é acionado ao coletar evento de ramal atendido
     const response = await notificacaoService.create();
@@ -32,7 +39,7 @@ return (
     <PhoneIcon className="h-28 w-28 text-gray-800" />
 
     <p className="text-lg text-gray-600">
-      Aguardando Ligação...
+      {statusTexto[status]}
     </p>
 
     <Button

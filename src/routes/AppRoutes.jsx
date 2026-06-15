@@ -8,10 +8,12 @@ import PrivateRoute from "./AppPrivateRoutes";
 import CadastroUsuarios from "../pages/CadastroUsuarios";
 import Configuracoes from "../pages/Configuracoes";
 import GravaAudio from "../pages/GravaAudio";
+import { LigacaoProvider } from "../components/context/LigacaoContext";
 
 export default function AppRoutes(){
     return(
         <HashRouter>
+            <LigacaoProvider>
             <Routes>
                 <Route path="/login" element={
                     <Login/>
@@ -49,6 +51,7 @@ export default function AppRoutes(){
                     }/>
                 </Route>
             </Routes>
+            </LigacaoProvider>
         </HashRouter>
     );
 }
