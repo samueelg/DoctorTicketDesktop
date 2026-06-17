@@ -16,21 +16,19 @@ export default function LigacaoFinalizada() {
         assunto: "",
         solicitante: "",
         unidade: "",
-        categoria: "",
-        status: "",
-        urgencia: ""
+        categoria: 'Solicitação de serviço',
+        status: 'Resolvido',
+        urgencia: 'Baixa'
         });
 
     useEffect(() => {
         if (dados) {
             setForm({
+                ...form,
                 titulo: dados.titulo,
                 assunto: dados.assunto,
                 solicitante: dados.solicitante,
                 unidade: dados.unidade,
-                categoria: 'Solicitação de serviço',
-                status: 'Novo',
-                urgencia: 'Baixa'
             })
         }
     }, [dados]);
@@ -77,7 +75,7 @@ export default function LigacaoFinalizada() {
                                 id='titulo'
                                 type='text'
                                 value={form.titulo}
-                                onChange={(e) => setForm({titulo: e.target.value})}
+                                onChange={(e) => setForm({...form, titulo: e.target.value})}
                                 placeholder="Digite o titulo da solicitação"
                                 className='max-w-md'
                                 inputClassName='text-base'
@@ -89,16 +87,16 @@ export default function LigacaoFinalizada() {
                                     id='unidade'
                                     type='text'
                                     value={form.unidade}
-                                    onChange={(e) => setForm({unidade: e.target.value})}
+                                    onChange={(e) => setForm({...form, unidade: e.target.value})}
                                     placeholder="Digite a Unidade"
                                     className='max-w-md'
                                     inputClassName='text-base'
                                 />
                                 <Input
                                     id='solicitante'
-                                    type='solicitante'
+                                    type='text'
                                     value={form.solicitante}
-                                    onChange={(e) => setForm({solicitante: e.target.value})}
+                                    onChange={(e) => setForm({...form, solicitante: e.target.value})}
                                     placeholder="Digite o solicitante"
                                     className='max-w-md'
                                     inputClassName='text-base'
@@ -109,7 +107,7 @@ export default function LigacaoFinalizada() {
                         <Textarea
                             id='assunto'
                             value={form.assunto}
-                            onChange={(e) => setForm({assunto: e.target.value})}
+                            onChange={(e) => setForm({...form, assunto: e.target.value})}
                             placeholder="Digite a mensagem da solicitação"
                             rows={6}
                         />
