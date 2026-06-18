@@ -6,6 +6,9 @@ import {
   Cog6ToothIcon,
 } from "@heroicons/react/24/outline";
 import { NavLink } from "react-router-dom";
+import { useConfigStore } from "../../stores/configStore";
+import Button from "../atoms/Button";
+
 
 const linkClass = ({ isActive }) =>
   `flex flex-col items-center gap-1 hover:text-gray-900 ${
@@ -13,6 +16,8 @@ const linkClass = ({ isActive }) =>
   }`;
 
 export function Sidebar() {
+  const openConfig = useConfigStore((state) => state.open);
+
   return (
     <aside className="w-20 flex-none border-r">
       <nav className="h-full flex flex-col items-center gap-6 py-6">
@@ -26,7 +31,7 @@ export function Sidebar() {
           <span className="text-[10px] leading-none">Relatórios</span>
         </NavLink>
 
-        <NavLink to="/gravar" className={linkClass}>
+        <NavLink to="/ligacaoFinalizada" className={linkClass}>
           <UserIcon className="h-6 w-6" />
           <span className="text-[10px] leading-none">Perfil</span>
         </NavLink>
@@ -36,10 +41,16 @@ export function Sidebar() {
           <span className="text-[10px] leading-none">Usuários</span>
         </NavLink>
 
-        <NavLink to="/configuracoes" className={(p) => linkClass(p) + " mt-auto"}>
-          <Cog6ToothIcon className="h-6 w-6" />
-          <span className="text-[10px] leading-none">Config</span>
-        </NavLink>
+        <div className="flex flex-col items-center">
+        <Button
+                type="button"
+                onClick={openConfig}
+                buttonClassName="w-full"
+                variant="none"
+                icon={<Cog6ToothIcon className="h-6 w-6" />}
+            />
+          <span className="text-[10px] leading-none">Configurações</span>
+        </div>
       </nav>
     </aside>
   );

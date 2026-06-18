@@ -5,21 +5,36 @@ import Textarea from "../components/atoms/Textarea";
 import { CheckCircleIcon } from "@heroicons/react/24/solid";
 import { useEffect, useState } from "react";
 import { ticketService } from "../services/ticketService";
+import { franqueadoService } from "../services/franqueadoService";
+import { AutoComplete } from 'primereact/autocomplete';
 
 export default function LigacaoFinalizada() {
     const location = useLocation();
     const dados = location.state?.data;
     const navigate = useNavigate();
     const [erro, setErro] = useState({});
+    const [item, setItem] = useState(null);
+    const [items, setItems] = useState([]);
     const [form, setForm] = useState({
         titulo: "",
         assunto: "",
-        solicitante: "",
+        solicitante: item?.idMovidesk,
         unidade: "",
         categoria: "",
         status: "",
         urgencia: ""
         });
+
+    const pesquisarUnidade = async (event) => {
+        const termo = event.query;
+
+        const response = await franqueadoService.get({
+                termo: termo,
+                limit: 20
+        });
+
+        setItems(response.data);
+    };
 
     useEffect(() => {
         if (dados) {
@@ -94,14 +109,36 @@ export default function LigacaoFinalizada() {
                                     className='max-w-md'
                                     inputClassName='text-base'
                                 />
-                                <Input
-                                    id='solicitante'
-                                    type='solicitante'
-                                    value={form.solicitante}
-                                    onChange={(e) => setForm({solicitante: e.target.value})}
+                                <AutoComplete
+                                    value={item}
+                                    suggestions={items}
+                                    completeMethod={pesquisarUnidade}
                                     placeholder="Digite o solicitante"
-                                    className='max-w-md'
-                                    inputClassName='text-base'
+                                    field="email"
+                                    onChange={(e) => setItem(e.value)}
+                                    className="w-full flex items-center mt-1"
+                                    inputClassName="
+                                        h-[38px]
+                                        w-full
+                                        rounded-md
+                                        border
+                                        border-gray-300
+                                        px-3
+                                        py-2
+                                        text-sm
+                                        hover:bg-gray-100
+                                        focus:outline-none
+                                        focus:ring-2
+                                        focus:ring-green-500
+                                    "
+                                    itemTemplate={(item) => (
+                                        <div className="flex flex-col">
+                                            <span className="font-semibold">{item.nome}</span>
+                                            <span className="text-sm text-gray-500">
+                                                {item.email}
+                                            </span>
+                                        </div>
+                                    )}
                                 />
                             </div>
                         </div>

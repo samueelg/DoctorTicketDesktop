@@ -3,6 +3,7 @@ import { Sidebar } from "../../components/layout/Sidebar";
 import { Notificacao } from "../../components/layout/Notificacao";
 import UserData from "../../components/layout/UserData";
 import { ToastProvider } from "../../components/context/ToastContext";
+import ConfiguracaoModal from "../../components/organisms/ConfiguracoesModal";
 
 export default function AppLayout(){
     return (
@@ -12,8 +13,8 @@ export default function AppLayout(){
             <Outlet />
         </main>
             <Notificacao/>
-
-        <UserData/>
+            <ConfiguracaoModal/>
+            <UserData/>
     </div>
     );
 }
