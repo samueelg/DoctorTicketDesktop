@@ -8,6 +8,7 @@ import {
 import { NavLink } from "react-router-dom";
 import { useConfigStore } from "../../stores/configStore";
 import Button from "../atoms/Button";
+import { useAuthStore } from "../../stores/authStore";
 
 
 const linkClass = ({ isActive }) =>
@@ -17,6 +18,7 @@ const linkClass = ({ isActive }) =>
 
 export function Sidebar() {
   const openConfig = useConfigStore((state) => state.open);
+  const user       = useAuthStore((state) => state.user);
 
   return (
     <aside className="w-20 flex-none border-r">
@@ -41,10 +43,12 @@ export function Sidebar() {
           <span className="text-[10px] leading-none">Gravar</span>
         </NavLink>
 
-        <NavLink to="/cadastro" className={linkClass}>
-          <UserIcon className="h-6 w-6" />
-          <span className="text-[10px] leading-none">Usuários</span>
-        </NavLink>
+        {user?.tipo === "admin" && (
+          <NavLink to="/cadastro" className={linkClass}>
+            <UserIcon className="h-6 w-6" />
+            <span>Usuários</span>
+          </NavLink>
+        )}
 
         <div className="flex flex-col items-center">
         <Button

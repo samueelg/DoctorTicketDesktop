@@ -28,7 +28,7 @@ return (
   
   <div className="inicio-page">
     <LoadingScreen visible={loading} />
-    <div className="flex w-full h-screen relative">
+    <div className="flex w-full h-screen relative bg-gray-50">
 
       {/* Conteúdo central */}
       <main className="flex-1"></main>

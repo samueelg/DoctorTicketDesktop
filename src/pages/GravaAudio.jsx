@@ -49,6 +49,7 @@ export default function GravaAudio() {
     if (mediaRecorderRef.current) {
       mediaRecorderRef.current.stop();
       setRecording(false);
+      setLoading(true);
     }
   }
 
@@ -61,6 +62,7 @@ export default function GravaAudio() {
       const data = response.data
 
       if(response.status == 200){
+        setLoading(false);
         navigate('/ligacaoFinalizada', {
           state: { data }
         });
@@ -76,7 +78,7 @@ export default function GravaAudio() {
     <div className="inicio-page">
       <Toast ref={toast} />
       <LoadingScreen visible={loading} />
-      <div className="flex w-full h-screen relative">
+      <div className="flex w-full h-screen relative bg-gray-50">
 
         {/* Conteúdo central */}
         <main className="flex-1"></main>

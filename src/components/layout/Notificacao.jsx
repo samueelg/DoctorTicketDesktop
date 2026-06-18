@@ -124,7 +124,7 @@ const notificationVariants = {
         };}, []);
 
     return (
-        <div className="flex justify-end pr-4 pt-4">
+        <div className="flex justify-end pr-4 pt-4 bg-gray-50">
             <Button
                 variant="none"
                 buttonClassName="p-overlay-badge relative p-0"

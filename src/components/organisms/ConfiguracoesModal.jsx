@@ -6,19 +6,15 @@ import { configuracaoService } from "../../services/configuracaoService";
 import { ArrowUturnLeftIcon } from "@heroicons/react/24/solid";
 import { useEffect, useState } from "react";
 import { usuariosService } from "../../services/usuarioService";
+import { useAuthStore } from "../../stores/authStore";
 
 export default function ConfiguracoesModal() {
     const { isOpen, close } = useConfigStore();
     const [idUsuario, setIdUsuario] = useState()
+    const user = useAuthStore((state) => state.user);
     const [formData, setFormData] = useState({
-        idMovidesk: "",
+      idMovidesk: "",
     });
-
-    useEffect(() => {
-      if (isOpen) {
-        getDadosUsuario();
-      }
-    }, [isOpen]);
 
     if (!isOpen) return null;
 
@@ -36,23 +32,9 @@ export default function ConfiguracoesModal() {
 
     }
 
-    async function getDadosUsuario(){
-      try{
-        const response = await usuariosService.me();
-        
-        if(response.status == 200){
-          setIdUsuario(response.data.id);
-          setFormData({idMovidesk: response.data.idMovidesk});
-        }
-    
-      }catch(error){
-        console.log('Erro ao buscar dados do usuario: ', error)
-      }
-    }
-
     async function salvaConfiguracoes(){
         const data = formData;
-        const id = idUsuario;
+        const id = user?.tipo
 
         try {
             const response = await configuracaoService.salvar(id, data);
@@ -106,8 +88,11 @@ export default function ConfiguracoesModal() {
 
                 <InputField
                   id="movidesk-id"
-                  value={formData.idMovidesk}
-                  onChange={(e) => setFormData({idMovidesk: e.target.value})}
+                  value={formData.idMovidesk || user?.idMovidesk || ""}
+                  onChange={(e) => setFormData((prev) => ({
+                    ...prev,
+                    idMovidesk: e.target.value,
+                  }))}
                   placeholder="Digite seu ID Movidesk"
                 />
 

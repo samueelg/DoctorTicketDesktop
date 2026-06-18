@@ -76,7 +76,7 @@ export default function LigacaoFinalizada() {
             ...form,
             solicitante: form.solicitante?.idMovidesk,
         };
-
+        
         try {
             //Cria o ticket
             const response = await ticketService.create(data);
@@ -94,7 +94,7 @@ export default function LigacaoFinalizada() {
 
     return (
         <div className="ligacaoFinalizada-page">
-            <div className="flex w-full min-h-screen justify-center items-center">
+            <div className="flex w-full min-h-screen justify-center items-center bg-gray-50">
                     <div className="w-full max-w-md">
                         <div className="row">
                             <div className="flex flex-row justify-center">
@@ -200,12 +200,6 @@ export default function LigacaoFinalizada() {
                                 className="mt-6 w-1/2"
                                 onClick={handleSubmit}
                                 buttonClassName="w-full rounded-2xl"
-                            />
-                            <Button
-                                type="button"
-                                text="Editar"
-                                className="mt-6 w-1/4"
-                                buttonClassName="w-full rounded-2xl bg-gray-200 hover:bg-gray-300 text-green-700"
                             />
                         </div>
                     </div>
