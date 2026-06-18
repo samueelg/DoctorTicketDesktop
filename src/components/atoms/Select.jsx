@@ -9,6 +9,7 @@ export default function Select({
     onChange,
     options = [],
     optionLabel = "",
+    optionValue = "",
     placeholder = "Selecione...",
     className = "",
     selectClassName = "",
@@ -32,6 +33,7 @@ export default function Select({
                 options={options}
                 optionLabel={optionLabel}
                 onChange={onChange}
+                optionValue={optionValue}
                 editable={editable}
                 placeholder={placeholder}
                 disabled={disabled}

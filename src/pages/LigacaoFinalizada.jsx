@@ -75,22 +75,21 @@ export default function LigacaoFinalizada() {
         const data = {
             ...form,
             solicitante: form.solicitante?.idMovidesk,
-            unidade: form.unidade?.id
         };
 
-        // try {
-        //     //Cria o ticket
-        //     const response = await ticketService.create(data);
+        try {
+            //Cria o ticket
+            const response = await ticketService.create(data);
 
-        //     if (response.status == 201) {
-        //         //Retorna para o inicio
-        //         navigate('/');
-        //     }
-        // } catch (err) {
-        //     const errosApi = err.response?.data?.errors || {};
-        //     setErro(errosApi);
-        //     console.log('erros: ', erro);
-        // }
+            if (response.status == 201) {
+                //Retorna para o inicio
+                navigate('/');
+            }
+        } catch (err) {
+            const errosApi = err.response?.data?.errors || {};
+            setErro(errosApi);
+            console.log('erros: ', erro);
+        }
     }
 
     return (
@@ -133,6 +132,7 @@ export default function LigacaoFinalizada() {
                                     }
                                     options={unidades} 
                                     optionLabel="nomeUnidade" 
+                                    optionValue="id"
                                     editable={true}
                                     placeholder="Unidade" 
                                     className="w-full flex items-center mt-1" 
