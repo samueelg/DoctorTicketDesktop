@@ -5,27 +5,29 @@ import Textarea from "../components/atoms/Textarea";
 import { CheckCircleIcon } from "@heroicons/react/24/solid";
 import { useEffect, useState } from "react";
 import { ticketService } from "../services/ticketService";
+import { unidadeService } from "../services/unidadeService";
 import { franqueadoService } from "../services/franqueadoService";
 import { AutoComplete } from 'primereact/autocomplete';
+import Select from "../components/atoms/Select";
 
 export default function LigacaoFinalizada() {
     const location = useLocation();
     const dados = location.state?.data;
     const navigate = useNavigate();
     const [erro, setErro] = useState({});
-    const [item, setItem] = useState(null);
     const [items, setItems] = useState([]);
+    const [unidades, setUnidades] = useState([]);
     const [form, setForm] = useState({
         titulo: "",
         assunto: "",
-        solicitante: item?.idMovidesk,
+        solicitante: "",
         unidade: "",
         categoria: 'Solicitação de serviço',
         status: 'Resolvido',
         urgencia: 'Baixa'
         });
 
-    const pesquisarUnidade = async (event) => {
+    const pesquisarFranqueado = async (event) => {
         const termo = event.query;
 
         const response = await franqueadoService.get({
@@ -36,36 +38,59 @@ export default function LigacaoFinalizada() {
         setItems(response.data);
     };
 
-    useEffect(() => {
-        if (dados) {
-            setForm({
-                ...form,
-                titulo: dados.titulo,
-                assunto: dados.assunto,
-                solicitante: dados.solicitante,
-                unidade: dados.unidade,
-            })
-        }
-    }, [dados]);
-
-    async function handleSubmit(e) {
-        e.preventDefault();
-
-        const data = form;
-
+    async function getUnidades(){
         try {
-            //Cria o ticket
-            const response = await ticketService.create(data);
+            //Busca as unidades
+            const response = await unidadeService.get();
 
-            if (response.status == 201) {
-                //Retorna para o inicio
-                navigate('/');
+            if (response.status == 200) {
+                setUnidades(response.data.data)
             }
         } catch (err) {
             const errosApi = err.response?.data?.errors || {};
             setErro(errosApi);
             console.log('erros: ', erro);
         }
+    }
+    
+    useEffect(() => {
+        getUnidades();
+    }, []);
+
+    useEffect(() => {
+        if (dados) {
+            setForm(prev => ({
+                ...prev,
+                titulo: dados.titulo,
+                assunto: dados.assunto,
+                solicitante: dados.solicitante,
+                unidade: dados.unidade,
+            }))
+        }
+    }, [dados]);
+
+    async function handleSubmit(e) {
+        e.preventDefault();
+
+        const data = {
+            ...form,
+            solicitante: form.solicitante?.idMovidesk,
+            unidade: form.unidade?.id
+        };
+
+        // try {
+        //     //Cria o ticket
+        //     const response = await ticketService.create(data);
+
+        //     if (response.status == 201) {
+        //         //Retorna para o inicio
+        //         navigate('/');
+        //     }
+        // } catch (err) {
+        //     const errosApi = err.response?.data?.errors || {};
+        //     setErro(errosApi);
+        //     console.log('erros: ', erro);
+        // }
     }
 
     return (
@@ -98,22 +123,40 @@ export default function LigacaoFinalizada() {
                         </div>
                         <div className="row mt-2">
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                <Input
-                                    id='unidade'
-                                    type='text'
-                                    value={form.unidade}
-                                    onChange={(e) => setForm({...form, unidade: e.target.value})}
-                                    placeholder="Digite a Unidade"
-                                    className='max-w-md'
-                                    inputClassName='text-base'
-                                />
+                                <Select 
+                                    value={form.unidade} 
+                                    onChange={(e) =>
+                                        setForm(prev => ({
+                                            ...prev,
+                                            unidade: e.value
+                                        }))
+                                    }
+                                    options={unidades} 
+                                    optionLabel="nomeUnidade" 
+                                    editable={true}
+                                    placeholder="Unidade" 
+                                    className="w-full flex items-center mt-1" 
+                                    selectClassName="
+                                        h-[38px] 
+                                        border
+                                        border-gray-300
+                                        hover:bg-gray-100
+                                        focus-within:ring-2
+                                        focus-within:ring-green-500
+                                "/>
+
                                 <AutoComplete
-                                    value={item}
+                                    value={form.solicitante}
                                     suggestions={items}
-                                    completeMethod={pesquisarUnidade}
+                                    completeMethod={pesquisarFranqueado}
                                     placeholder="Digite o solicitante"
                                     field="email"
-                                    onChange={(e) => setItem(e.value)}
+                                    onChange={(e) =>
+                                        setForm(prev => ({
+                                            ...prev,
+                                            solicitante: e.value
+                                        }))
+                                    }
                                     className="w-full flex items-center mt-1"
                                     inputClassName="
                                         h-[38px]
