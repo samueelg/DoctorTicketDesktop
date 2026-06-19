@@ -7,9 +7,11 @@ import echo from "../../services/echo";
 import { notificacaoService } from "../../services/notificacaoService";
 import { useToast } from "../context/ToastContext";
 import { motion, AnimatePresence } from "motion/react";
+import somNotificacao from "../../assets/sounds/notificacao.mp3";
 
 export function Notificacao() {
     const op = useRef(null);
+    const audioRef = useRef(new Audio(somNotificacao));
     const [notificacoes, setNotificacoes] = useState([]);
     const [erro, setErro] = useState();
     const qtdeNotificacoes = notificacoes.filter(n => !n.lida_em).length;
@@ -115,6 +117,9 @@ const notificationVariants = {
                     e,
                     ...prev
                 ]);
+
+                audioRef.current.currentTime = 0;
+                audioRef.current.play().catch(err => console.warn('Não foi possível tocar o som', err));
 
                 showToast('info', 'Nova Notificação', 'Notificação adicionada');
             });

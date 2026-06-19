@@ -8,11 +8,13 @@ import PrivateRoute from "./AppPrivateRoutes";
 import CadastroUsuarios from "../pages/CadastroUsuarios";
 import GravaAudio from "../pages/GravaAudio";
 import { LigacaoProvider } from "../components/context/LigacaoContext";
+import { RelatorioProvider } from "../components/context/RelatorioContext";
 
 export default function AppRoutes(){
     return(
         <HashRouter>
             <LigacaoProvider>
+            <RelatorioProvider>
             <Routes>
                 <Route path="/login" element={
                     <Login/>
@@ -45,6 +47,7 @@ export default function AppRoutes(){
                     }/>
                 </Route>
             </Routes>
+            </RelatorioProvider>
             </LigacaoProvider>
         </HashRouter>
     );

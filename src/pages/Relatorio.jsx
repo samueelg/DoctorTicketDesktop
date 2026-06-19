@@ -4,9 +4,11 @@ import InputField from "../components/atoms/InputField";
 import { DocumentIcon, FunnelIcon, TableCellsIcon } from "@heroicons/react/24/outline";
 import { relatorioService } from "../services/relatorioService";
 import { Calendar } from 'primereact/calendar';
+import { Skeleton } from 'primereact/skeleton';
 import { useEffect, useState } from "react";
 import { addLocale } from 'primereact/api';
 import { usuariosService } from '../services/usuarioService';
+import { useRelatorio } from "../components/context/RelatorioContext";
 
 export default function RelatorioBase(){
     const [form, setForm] = useState({
@@ -16,13 +18,28 @@ export default function RelatorioBase(){
     });
 
     const [mostraResultados, setMostraResultado] = useState(false);
+    const [carregando, setCarregando] = useState(false);
     const [resultado, setResultado] = useState(null);
     const [usuarios, setUsuarios] = useState([]);
-    const [loading, setLoading] = useState(false);
+    const { gerando, exportarRelatorio } = useRelatorio();
 
     useEffect(() => {
         getUsuarios();
     },[]);
+
+    const formatarDataHora = (valor) => {
+        if (!valor) return 'Não retornado';
+        const data = new Date(valor);
+        if (isNaN(data.getTime())) return 'Não retornado';
+        return data.toLocaleString('pt-BR', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+        });
+    };
 
     // Config Calendario
     addLocale('pt-BR', {
@@ -89,15 +106,23 @@ export default function RelatorioBase(){
     async function buscarRelatorio(e) {
         e.preventDefault();
 
-        //Dados de filtro e data 
+        const intervalo = (form.data ?? []).filter(Boolean);
+        if (intervalo.length < 2) {
+            console.log('Selecione um intervalo de datas completo.');
+            return;
+        }
+
+        //Dados de filtro e data
         const data = {
-            data: form.data.map(d => d.toISOString()),
+            data: intervalo.map(d => d.toISOString()),
             filtro: form.filtro,
             usuario: form.usuario,
         };
 
         try {
             setMostraResultado(true);
+            setCarregando(true);
+            setResultado(null);
             const response = await relatorioService.getTicketsChat(data);
 
             if (response.status == 200) {
@@ -105,6 +130,8 @@ export default function RelatorioBase(){
             }
         } catch (err) {
             console.log('erros: ', err);
+        } finally {
+            setCarregando(false);
         }
     }
 
@@ -118,46 +145,6 @@ export default function RelatorioBase(){
         } catch (err) {
             console.log('erros: ', err);
         }
-    }
-
-    async function exportarRelatorio(dados, tipo) {
-            const data = {
-                data: form.data.map(d => d.toISOString()),
-                filtro: form.filtro,
-                tipo: tipo,
-                usuario: form.usuario,
-            }
-
-            const response = await relatorioService.exportarRelatorio(data);
-
-            const mimeType = {
-                excel: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                pdf: 'application/pdf'
-            };
-
-
-            const extensao = {
-                excel: 'xlsx',
-                pdf: 'pdf'
-            };
-
-            const blob = new Blob([
-                response.data
-            ], {
-                type: mimeType[tipo]
-            });
-
-            const url = window.URL.createObjectURL(blob);
-
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `relatorio.${extensao[tipo]}`;
-
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
-
-            window.URL.revokeObjectURL(url);
     }
 
     return (
@@ -261,21 +248,44 @@ export default function RelatorioBase(){
                                 <div className="gap-2 flex">
                                     <Button
                                         icon={<TableCellsIcon  className="h-5 w-5"/>}
-                                        text={'Excel'}
+                                        text={gerando ? 'Gerando...' : 'Excel'}
+                                        disabled={gerando}
                                         buttonClassName="rounded-2xl p-1.5 bg-blue-300 hover:bg-blue-500"
-                                        onClick={() => exportarRelatorio(resultado, 'excel')}
+                                        onClick={() => exportarRelatorio(form, 'excel')}
                                     />
                                     <Button
                                         icon={<DocumentIcon  className="h-5 w-5"/>}
-                                        text={'PDF'}
+                                        text={gerando ? 'Gerando...' : 'PDF'}
+                                        disabled={gerando}
                                         buttonClassName="rounded-2xl p-1.5 bg-green-400"
-                                        onClick={() => exportarRelatorio(resultado, 'pdf')}
+                                        onClick={() => exportarRelatorio(form, 'pdf')}
                                     />
                                 </div>
                             </div>
                         
                         <div className="" id="tickets">
-                        {resultado ? (
+                        {carregando ? (
+                            Array.from({ length: 3 }).map((_, i) => (
+                            <div className="rounded-xl border m-4 p-3 bg-white shadow-md" key={`skeleton-${i}`}>
+                                <div className="flex flex-cols gap-4 items-center">
+                                    <Skeleton width="3rem" height="0.75rem" />
+                                    <Skeleton width="4rem" height="1.5rem" borderRadius="0.75rem" />
+                                </div>
+                                <div className="mt-2">
+                                    <Skeleton width="70%" height="1.25rem" />
+                                </div>
+                                <div className="mt-2">
+                                    <Skeleton width="50%" height="0.875rem" />
+                                </div>
+                                <div className="mt-1">
+                                    <Skeleton width="50%" height="0.875rem" />
+                                </div>
+                                <div className="mt-1">
+                                    <Skeleton width="40%" height="0.875rem" />
+                                </div>
+                            </div>
+                            ))
+                        ) : resultado && resultado.length > 0 ? (
                             resultado.map(ticket =>(
                             <div id="dataTicket" className="rounded-xl border m-4 p-3 bg-white shadow-md" key={ticket.id}>
                                 <div className="flex flex-cols gap-4">
@@ -296,13 +306,13 @@ export default function RelatorioBase(){
                                     <h1 id="analistaTicket" className="text-gray-500 text-sm">Responsavel: {ticket.owner?.businessName ?? 'Não retornado'}</h1>
                                 </div>
                                 <div id="divData">
-                                    <h1 id="dataTicket" className="text-gray-500 text-sm">Data/Hora: {ticket.resolvedIn}</h1>
+                                    <h1 id="dataTicket" className="text-gray-500 text-sm">Data/Hora: {formatarDataHora(ticket.resolvedIn)}</h1>
                                 </div>
                                 </div>
                             ))
-                        )
-                         : <h1>Nao encontrado</h1>
-                        }
+                        ) : (
+                            <h1>Nao encontrado</h1>
+                        )}
                         </div>
                         </section>
                         )}
