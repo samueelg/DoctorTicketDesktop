@@ -4,19 +4,25 @@ import InputField from "../components/atoms/InputField";
 import { DocumentIcon, FunnelIcon, TableCellsIcon } from "@heroicons/react/24/outline";
 import { relatorioService } from "../services/relatorioService";
 import { Calendar } from 'primereact/calendar';
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { addLocale } from 'primereact/api';
-
+import { usuariosService } from '../services/usuarioService';
 
 export default function RelatorioBase(){
     const [form, setForm] = useState({
         data: "",
         filtro: "",
+        usuario: "",
     });
 
     const [mostraResultados, setMostraResultado] = useState(false);
     const [resultado, setResultado] = useState(null);
+    const [usuarios, setUsuarios] = useState([]);
     const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        getUsuarios();
+    },[]);
 
     // Config Calendario
     addLocale('pt-BR', {
@@ -78,7 +84,7 @@ export default function RelatorioBase(){
     ],
     today: 'Hoje',
     clear: 'Limpar'
-});
+    });
 
     async function buscarRelatorio(e) {
         e.preventDefault();
@@ -86,7 +92,8 @@ export default function RelatorioBase(){
         //Dados de filtro e data 
         const data = {
             data: form.data.map(d => d.toISOString()),
-            filtro: form.filtro
+            filtro: form.filtro,
+            usuario: form.usuario,
         };
 
         try {
@@ -101,11 +108,24 @@ export default function RelatorioBase(){
         }
     }
 
+    async function getUsuarios(){
+        try {
+            const response = await usuariosService.list();
+
+            if (response.status == 200) {
+                setUsuarios(response.data.data);
+            }
+        } catch (err) {
+            console.log('erros: ', err);
+        }
+    }
+
     async function exportarRelatorio(dados, tipo) {
             const data = {
                 data: form.data.map(d => d.toISOString()),
                 filtro: form.filtro,
                 tipo: tipo,
+                usuario: form.usuario,
             }
 
             const response = await relatorioService.exportarRelatorio(data);
@@ -176,7 +196,11 @@ export default function RelatorioBase(){
                                     name={'filtro'}
                                     label={'Filtro:'}
                                     value={form.filtro}
-                                    onChange={(e) => setForm({ filtro: e.value, data: form.data})}
+                                    onChange={(e) => setForm(prev => ({
+                                        ...prev,
+                                        filtro: e.value, data: form.data
+                                        }))
+                                    }
                                     options={[
                                         {value: "1", label: "Chats WhatsApp"},
                                     ]}
@@ -184,13 +208,29 @@ export default function RelatorioBase(){
                                 />
                             </div>
                             <div className="mx-auto mt-4 mb-2">
-                                <InputField
+                                <Select
+                                    name={'usuario'}
                                     label={'Usuário'}
-                                    id='nomeUsuario'
+                                    value={form.usuario} 
+                                    optionLabel="nome" 
+                                    optionValue="id"
+                                    showClear={true}
+                                    onChange={(e) =>
+                                        setForm(prev => ({
+                                            ...prev,
+                                            usuario: e.value
+                                        }))
+                                    }
+                                    options={usuarios}
                                     placeholder={'Digite o nome do usuário'}
-                                    className='h-14'
-                                    type='text'
-                                    inputClassName='text-base'
+                                    selectClassName="
+                                        h-[38px] 
+                                        border
+                                        border-gray-300
+                                        hover:bg-gray-100
+                                        focus-within:ring-2
+                                        focus-within:ring-green-500
+                                "
                                 />
                             </div>
 

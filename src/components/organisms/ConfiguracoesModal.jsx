@@ -7,6 +7,7 @@ import { ArrowUturnLeftIcon } from "@heroicons/react/24/solid";
 import { useEffect, useState } from "react";
 import { usuariosService } from "../../services/usuarioService";
 import { useAuthStore } from "../../stores/authStore";
+import { useNavigate } from "react-router-dom";
 
 export default function ConfiguracoesModal() {
     const { isOpen, close } = useConfigStore();
@@ -15,6 +16,16 @@ export default function ConfiguracoesModal() {
     const [formData, setFormData] = useState({
       idMovidesk: "",
     });
+    const navigate = useNavigate();
+
+    useEffect(() => {   
+      if (user?.idMovidesk !== undefined) {
+        setFormData((prev) => ({
+          ...prev,
+          idMovidesk: user.idMovidesk ?? "",
+        }));
+      }
+    }, [user?.idMovidesk]);
 
     if (!isOpen) return null;
 
@@ -25,6 +36,7 @@ export default function ConfiguracoesModal() {
         } catch (error) {
             console.error(error);
         } finally {
+            close();
             localStorage.removeItem("token");
 
             navigate("/login");
@@ -34,7 +46,7 @@ export default function ConfiguracoesModal() {
 
     async function salvaConfiguracoes(){
         const data = formData;
-        const id = user?.tipo
+        const id = user?.id
 
         try {
             const response = await configuracaoService.salvar(id, data);
@@ -88,7 +100,7 @@ export default function ConfiguracoesModal() {
 
                 <InputField
                   id="movidesk-id"
-                  value={formData.idMovidesk || user?.idMovidesk || ""}
+                  value={formData.idMovidesk}
                   onChange={(e) => setFormData((prev) => ({
                     ...prev,
                     idMovidesk: e.target.value,

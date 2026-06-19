@@ -46,7 +46,7 @@ export function Sidebar() {
         {user?.tipo === "admin" && (
           <NavLink to="/cadastro" className={linkClass}>
             <UserIcon className="h-6 w-6" />
-            <span>Usuários</span>
+            <span className="text-[10px] leading-none">Usuários</span>
           </NavLink>
         )}
 
@@ -54,7 +54,7 @@ export function Sidebar() {
         <Button
                 type="button"
                 onClick={openConfig}
-                buttonClassName="w-full"
+                buttonClassName="w-full text-gray-600"
                 variant="none"
                 icon={<Cog6ToothIcon className="h-6 w-6" />}
             />

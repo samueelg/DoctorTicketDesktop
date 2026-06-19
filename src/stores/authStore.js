@@ -14,6 +14,7 @@ export const useAuthStore = create((set) => ({
       if (response.status === 200) {
         set({
           user: {
+            id: response.data.id,
             nome: response.data.nome,
             ramal: response.data.ramal,
             tipo: response.data.tipo,

@@ -13,6 +13,7 @@ export default function Select({
     placeholder = "Selecione...",
     className = "",
     selectClassName = "",
+    showClear = false,
     required = false,
     disabled = false,
     filter = false,
@@ -37,6 +38,7 @@ export default function Select({
                 editable={editable}
                 placeholder={placeholder}
                 disabled={disabled}
+                showClear={showClear}
                 filter={filter}
                 className={twMerge("w-full", selectClassName)}
                 pt={{

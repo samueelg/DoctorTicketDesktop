@@ -32,16 +32,6 @@ export default function Login() {
         }
     }
 
-    async function changeShowPassword(){
-        setShowSenha(!showSenha);
-
-        if(showSenha){
-            setIconSenha(<EyeIcon className="w-5"/>);
-        }else{
-            setIconSenha(<EyeSlashIcon className="w-5"/>);
-        }
-    }
-
     return (
         <div className="login-page">
             <div className="flex w-full h-screen">
@@ -91,13 +81,6 @@ export default function Login() {
                                         className='max-w-md mt-4'
                                         inputClassName='text-base'
                                         />
-                                        <Button
-                                            type="button"
-                                            variant="none"
-                                            onClick={changeShowPassword}
-                                            className="absolute right-1 top-12 -translate-y-1/2 text-gray-500"
-                                            icon={iconSenha}
-                                        />
                                     </div>
 
                                     {/*Input E-mail */}
@@ -109,17 +92,7 @@ export default function Login() {
                                             buttonClassName="w-full"
                                         />
                                     </div>
-                                    <div className="col">
-                                        <hr className="my-7 border-t border-gray-300" />
-                                    </div>
 
-                                    <div className="col">
-                                        <div className="grid content-center">
-                                        <button type="button" className="text-md text-blue-600 hover:underline hover:text-blue-300">
-                                            Esqueci minha senha
-                                        </button>
-                                        </div>
-                                    </div>
                                 </div>
                                 </form>
                             </div>

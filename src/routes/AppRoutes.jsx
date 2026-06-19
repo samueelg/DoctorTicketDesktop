@@ -6,7 +6,6 @@ import AppLayout from "../pages/layouts/AppLayout";
 import Relatorio from "../pages/Relatorio";
 import PrivateRoute from "./AppPrivateRoutes";
 import CadastroUsuarios from "../pages/CadastroUsuarios";
-import Configuracoes from "../pages/Configuracoes";
 import GravaAudio from "../pages/GravaAudio";
 import { LigacaoProvider } from "../components/context/LigacaoContext";
 
@@ -42,11 +41,6 @@ export default function AppRoutes(){
                     <Route path="/cadastro" element={
                         <PrivateRoute>
                             <CadastroUsuarios/>
-                        </PrivateRoute>
-                    }/>
-                    <Route path="/configuracoes" element={
-                        <PrivateRoute>
-                            <Configuracoes/>
                         </PrivateRoute>
                     }/>
                 </Route>

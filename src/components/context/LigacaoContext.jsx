@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import echo from "../../services/echo";
+import { useAuthStore } from "../../stores/authStore";
 
 const LigacaoContext = createContext();
 
@@ -8,9 +9,15 @@ export function LigacaoProvider({ children }) {
     const [status, setStatus] = useState("wait");
     const navigate = useNavigate();
     const location = useLocation();
+    const user = useAuthStore((state) => state.user);
+    
 
     useEffect(() => {
-        echo.channel("usuario.ramal.236")
+        setStatus("wait");
+    }, [location.pathname]);
+
+    useEffect(() => {
+        echo.channel(`usuario.ramal.${user?.ramal}`)
             .listen(".ligacao.status", (e) => {
                 console.log("status recebido: ", e);
                 setStatus(e.status); // ajuste pro campo que vem no evento
@@ -27,7 +34,7 @@ export function LigacaoProvider({ children }) {
             });
 
         return () => {
-            echo.leave("usuario.ramal.236");
+            echo.leave(`usuario.ramal.${user?.ramal}`);
         };
     }, [navigate, location.pathname]);
 

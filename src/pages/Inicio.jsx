@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PhoneIcon } from "@heroicons/react/24/solid";
 import Button from "../components/atoms/Button";
 import { useNavigate } from "react-router-dom";
