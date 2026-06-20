@@ -10,6 +10,7 @@ export default function Button({
     icon = null,
     iconPos = "left",
     disabled = false,
+    loading = false,
     children,
 }) {
     const variants = {
@@ -20,22 +21,30 @@ export default function Button({
         none: ''
     };
 
+    const isDisabled = disabled || loading;
+
     return (
         <div className={className}>
             <button
                 type={type}
                 onClick={onClick}
-                disabled={disabled}
+                disabled={isDisabled}
                 className={twMerge(
           "inline-flex items-center justify-center px-4 py-2 rounded-md text-md font-medium focus:outline-none focus:ring-2 transition",
           variants[variant],
-          disabled && "opacity-50 cursor-not-allowed",
+          isDisabled && "opacity-50 cursor-not-allowed",
           buttonClassName
         )}
             >
-            {icon && iconPos === "left" && icon}
+            {loading && (
+                <svg className="animate-spin h-4 w-4 mr-2" viewBox="0 0 24 24" fill="none">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>
+            )}
+            {!loading && icon && iconPos === "left" && icon}
                 {text}
-            {icon && iconPos === "right" && icon}
+            {!loading && icon && iconPos === "right" && icon}
 
             {children}
             </button>

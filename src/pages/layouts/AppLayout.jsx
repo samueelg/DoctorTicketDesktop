@@ -15,9 +15,9 @@ export default function AppLayout(){
     }, []);
 
     return (
-    <div className="flex h-screen">
+    <div className="flex h-full">
         <Sidebar />
-        <main className="flex-1 overflow-auto">
+        <main className="flex-1 min-w-0">
             <Outlet />
         </main>
             <Notificacao/>

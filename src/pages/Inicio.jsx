@@ -18,12 +18,6 @@ export default function Inicio() {
     'up': 'Ligação em andamento...'
   }
 
-
-  async function criarNotificacao(e) {
-    //Implementar método de finalizaLigacao, que é acionado ao coletar evento de ramal atendido
-    const response = await notificacaoService.create();
-  }
-
 return (
   
   <div className="inicio-page">
@@ -36,17 +30,13 @@ return (
 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
   <div className="pointer-events-auto flex flex-col items-center gap-3">
 
-    <PhoneIcon className="h-28 w-28 text-gray-800" />
+    <PhoneIcon
+      className={`h-28 w-28 text-gray-800 ${status === 'ringing' ? 'phone-ringing' : ''}`}
+    />
 
     <p className="text-lg text-gray-600">
       {statusTexto[status]}
     </p>
-
-    <Button
-      className="hidden"
-      text={'Dispara Notificação'}
-      onClick={criarNotificacao}
-    />
 
   </div>
 </div>

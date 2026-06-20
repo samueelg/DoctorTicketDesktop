@@ -29,7 +29,13 @@ export default function UserModal({
     return (
 
         <div className="modal-cadastro">
-            <Dialog header={header} visible={visible} style={{ width: '50vw' }} onHide={onHide}>
+            <Dialog
+                header={header}
+                visible={visible}
+                style={{ width: '50vw' }}
+                onHide={onHide}
+                transitionOptions={{ classNames: 'modal-anim', timeout: 250 }}
+            >
                 <form onSubmit={onSubmit}>
                     <div className="justify-center mb-3">
                         <div className="flex flex-row">

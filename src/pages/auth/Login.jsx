@@ -33,8 +33,8 @@ export default function Login() {
     }
 
     return (
-        <div className="login-page">
-            <div className="flex w-full h-screen">
+        <div className="login-page h-full">
+            <div className="flex w-full h-full">
                 <div className="w-[45%] bg-slate-50 flex justify-center items-center">
                     <div className="grid grid-rows-3">
                         <div className="row-span-2">

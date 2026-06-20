@@ -8,6 +8,7 @@ import { notificacaoService } from "../../services/notificacaoService";
 import { useToast } from "../context/ToastContext";
 import { motion, AnimatePresence } from "motion/react";
 import somNotificacao from "../../assets/sounds/notificacao.mp3";
+import { useAuthStore } from "../../stores/authStore";
 
 export function Notificacao() {
     const op = useRef(null);
@@ -77,6 +78,24 @@ const notificationVariants = {
         }
     }
 
+    async function marcarTodasComoLidas(){
+        try{
+            if(qtdeNotificacoes === 0){
+                return;
+            }
+
+            const response = await notificacaoService.lerTodas();
+
+            if(response.status == 200 && response.data.success){
+                carregarNotificacoes();
+            }
+
+        }catch(err){
+            setErro(err);
+            console.log(err);
+        }
+    }
+
     async function removeNotificacao(notificacao){
         try{
             const idNotificacao = notificacao.id;
@@ -113,11 +132,15 @@ const notificationVariants = {
         //Ajstar depois para private e para ecutar o usuário da sessão
         echo.channel('usuario.1')
             .listen('.notificacao.criada', (e) => {
+                const { exibeNotificacoes } = useAuthStore.getState();
+                
                 setNotificacoes(prev => [
                     e,
                     ...prev
                 ]);
-
+                
+                if (!exibeNotificacoes) return;
+                
                 audioRef.current.currentTime = 0;
                 audioRef.current.play().catch(err => console.warn('Não foi possível tocar o som', err));
 
@@ -158,7 +181,11 @@ const notificationVariants = {
                 Notificações
             </h2>
 
-            <button className="text-xs font-medium text-gray-600 hover:text-black transition">
+            <button
+                onClick={marcarTodasComoLidas}
+                disabled={qtdeNotificacoes === 0}
+                className="text-xs font-medium text-gray-600 hover:text-black transition disabled:opacity-40 disabled:cursor-not-allowed"
+            >
                 ✓ Marcar todas
             </button>
         </div>

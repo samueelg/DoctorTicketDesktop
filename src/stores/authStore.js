@@ -19,6 +19,7 @@ export const useAuthStore = create((set) => ({
             ramal: response.data.ramal,
             tipo: response.data.tipo,
             idMovidesk: response.data.idMovidesk,
+            exibeNotificacoes: response.data.exibeNotificacoes ?? true,
           },
         });
       }

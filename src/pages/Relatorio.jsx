@@ -148,8 +148,8 @@ export default function RelatorioBase(){
     }
 
     return (
-        <div className="relatorio-base-page">
-            <div className="min-h-screen bg-gray-50">
+        <div className="relatorio-base-page h-full">
+            <div className="h-full overflow-y-auto bg-gray-50">
                 <div className="mx-auto w-full max-w-2xl px-6 p-6">
                     <div className="mb-6">
                         <h1 className="text-2xl font-semibold">Relatório</h1>
@@ -263,7 +263,7 @@ export default function RelatorioBase(){
                                 </div>
                             </div>
                         
-                        <div className="" id="tickets">
+                        <div className="max-h-80 overflow-y-auto" id="tickets">
                         {carregando ? (
                             Array.from({ length: 3 }).map((_, i) => (
                             <div className="rounded-xl border m-4 p-3 bg-white shadow-md" key={`skeleton-${i}`}>
