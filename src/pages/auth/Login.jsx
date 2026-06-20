@@ -4,36 +4,56 @@ import Button from "../../components/atoms/Button";
 import logo from "../../assets/images/oralsinlogo.jpg"
 import { api } from "../../services/api";
 import { useNavigate } from 'react-router-dom';
-import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/solid";
+import { useToast } from "../../components/context/ToastContext";
+import { motion } from "motion/react";
 
 export default function Login() {
     const [email, setEmail] = useState("");
     const [senha, setSenha] = useState("");
     const [showSenha, setShowSenha] = useState(false);
-    const [iconSenha, setIconSenha] = useState(<EyeIcon className="w-5"/>)
     const [erro, setErro] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [sucesso, setSucesso] = useState(false);
     const navigate = useNavigate();
+    const { showToast } = useToast();
+
+    const formInvalido = !email.trim() || !senha.trim();
 
     async function handleLogin(e) {
         e.preventDefault();
         setErro("");
+
+        if (formInvalido || loading || sucesso) return;
+
+        setLoading(true);
 
         try{
             const res = await api.post('/login', {email,senha});
 
             if(res.status == 200){
                 localStorage.setItem('token', res.data.token);
-                navigate("/")
+                setSucesso(true); // dispara o zoom in; navega no fim da animação
             }
 
         }catch(err){
-            setErro(err.response?.data?.message || "Falha no login");
+            const mensagem = err.response?.data?.message || "Falha no login";
+            setErro(mensagem);
+            showToast('error', 'Erro', mensagem);
             console.log(err);
+            setLoading(false);
         }
     }
 
     return (
-        <div className="login-page h-full">
+        <motion.div
+            className="login-page h-full"
+            initial={{ scale: 1, opacity: 1 }}
+            animate={sucesso ? { scale: 1.15, opacity: 0 } : { scale: 1, opacity: 1 }}
+            transition={{ duration: 0.5, ease: "easeIn" }}
+            onAnimationComplete={() => {
+                if (sucesso) navigate("/");
+            }}
+        >
             <div className="flex w-full h-full">
                 <div className="w-[45%] bg-slate-50 flex justify-center items-center">
                     <div className="grid grid-rows-3">
@@ -75,7 +95,7 @@ export default function Login() {
                                         <Input
                                         id='senha'
                                         label='Senha'
-                                        type={showSenha ? 'text' : 'password'}
+                                        type='password'
                                         onChange={(e) => setSenha(e.target.value)}
                                         placeholder="Digite sua senha"
                                         className='max-w-md mt-4'
@@ -87,9 +107,11 @@ export default function Login() {
                                     <div className="col">
                                         <Button
                                             type="submit"
-                                            text="Entrar"
+                                            text={loading ? "Entrando..." : "Entrar"}
                                             className="mt-6 max-w-md"
                                             buttonClassName="w-full"
+                                            disabled={formInvalido}
+                                            loading={loading}
                                         />
                                     </div>
 
@@ -101,6 +123,6 @@ export default function Login() {
                     </div>
                 </div>
             </div>
-        </div>
+        </motion.div>
     );
 }
