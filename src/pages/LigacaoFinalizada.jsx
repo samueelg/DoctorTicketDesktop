@@ -22,6 +22,7 @@ export default function LigacaoFinalizada() {
         assunto: "",
         solicitante: "",
         unidade: "",
+        serviceFirstLevelId: "",
         categoria: 'Solicitação de serviço',
         status: 'Resolvido',
         urgencia: 'Baixa'
@@ -65,6 +66,7 @@ export default function LigacaoFinalizada() {
                 assunto: dados.assunto,
                 solicitante: dados.solicitante,
                 unidade: dados.unidade,
+                serviceFirstLevelId: dados.serviceFirstLevelId,
             }))
         }
     }, [dados]);

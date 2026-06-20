@@ -17,6 +17,7 @@ export function Notificacao() {
     const [erro, setErro] = useState();
     const qtdeNotificacoes = notificacoes.filter(n => !n.lida_em).length;
     const { showToast } = useToast();
+    const userId = useAuthStore((state) => state.user?.id);
     const panelVariants = {
     hidden: {
         opacity: 0,
@@ -127,20 +128,20 @@ const notificationVariants = {
 
     useEffect(() => {
 
-    carregarNotificacoes();
+        carregarNotificacoes();
 
-        //Ajstar depois para private e para ecutar o usuário da sessão
-        echo.channel('usuario.1')
+        if (!userId) return;
+
+        echo.private(`usuario.${userId}`)
             .listen('.notificacao.criada', (e) => {
-                const { exibeNotificacoes } = useAuthStore.getState();
-                
                 setNotificacoes(prev => [
                     e,
                     ...prev
                 ]);
-                
+
+                const exibeNotificacoes = useAuthStore.getState().user?.exibeNotificacoes;
                 if (!exibeNotificacoes) return;
-                
+
                 audioRef.current.currentTime = 0;
                 audioRef.current.play().catch(err => console.warn('Não foi possível tocar o som', err));
 
@@ -148,8 +149,9 @@ const notificationVariants = {
             });
 
         return () => {
-            echo.leave('usuario.1');
-        };}, []);
+            echo.leave(`usuario.${userId}`);
+        };
+    }, [userId]);
 
     return (
         <div className="flex justify-end pr-4 pt-4 bg-gray-50">

@@ -17,7 +17,7 @@ export function LigacaoProvider({ children }) {
     }, [location.pathname]);
 
     useEffect(() => {
-        echo.channel(`usuario.ramal.${user?.ramal}`)
+        echo.private(`usuario.ramal.${user?.ramal}`)
             .listen(".ligacao.status", (e) => {
                 console.log("status recebido: ", e);
                 setStatus(e.status); // ajuste pro campo que vem no evento
@@ -36,7 +36,7 @@ export function LigacaoProvider({ children }) {
         return () => {
             echo.leave(`usuario.ramal.${user?.ramal}`);
         };
-    }, [navigate, location.pathname]);
+    }, [navigate, location.pathname, user?.ramal]);
 
     return (
         <LigacaoContext.Provider value={{ status }}>

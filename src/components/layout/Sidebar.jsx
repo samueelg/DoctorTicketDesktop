@@ -33,16 +33,6 @@ export function Sidebar() {
           <span className="text-[10px] leading-none">Relatórios</span>
         </NavLink>
 
-        <NavLink to="/ligacaoFinalizada" className={linkClass}>
-          <UserIcon className="h-6 w-6" />
-          <span className="text-[10px] leading-none">Perfil</span>
-        </NavLink>
-
-        <NavLink to="/gravar" className={linkClass}>
-          <UserIcon className="h-6 w-6" />
-          <span className="text-[10px] leading-none">Gravar</span>
-        </NavLink>
-
         {user?.tipo === "admin" && (
           <NavLink to="/cadastro" className={linkClass}>
             <UserIcon className="h-6 w-6" />
