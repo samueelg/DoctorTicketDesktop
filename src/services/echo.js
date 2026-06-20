@@ -1,5 +1,6 @@
 import Echo from 'laravel-echo';
 import Pusher from 'pusher-js';
+import { api } from './api';
 
 window.Pusher = Pusher;
 
@@ -15,6 +16,17 @@ const echo = new Echo({
     forceTLS: false,
 
     enabledTransports: ['ws'],
+
+    authorizer: (channel) => ({
+        authorize: (socketId, callback) => {
+            api.post('/broadcasting/auth', {
+                socket_id: socketId,
+                channel_name: channel.name,
+            })
+                .then((response) => callback(null, response.data))
+                .catch((error) => callback(error));
+        },
+    }),
 });
 
 window.Echo = echo;

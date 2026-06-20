@@ -8,12 +8,16 @@ export default function Select({
     value,
     onChange,
     options = [],
+    optionLabel = "",
+    optionValue = "",
     placeholder = "Selecione...",
     className = "",
     selectClassName = "",
+    showClear = false,
     required = false,
     disabled = false,
     filter = false,
+    editable = false,
 }) {
     return (
         <div className={twMerge("flex flex-col gap-1", className)}>
@@ -28,9 +32,13 @@ export default function Select({
                 inputId={id}
                 value={value}
                 options={options}
+                optionLabel={optionLabel}
                 onChange={onChange}
+                optionValue={optionValue}
+                editable={editable}
                 placeholder={placeholder}
                 disabled={disabled}
+                showClear={showClear}
                 filter={filter}
                 className={twMerge("w-full", selectClassName)}
                 pt={{

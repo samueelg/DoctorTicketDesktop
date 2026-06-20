@@ -4,19 +4,42 @@ import InputField from "../components/atoms/InputField";
 import { DocumentIcon, FunnelIcon, TableCellsIcon } from "@heroicons/react/24/outline";
 import { relatorioService } from "../services/relatorioService";
 import { Calendar } from 'primereact/calendar';
-import { useState } from "react";
+import { Skeleton } from 'primereact/skeleton';
+import { useEffect, useState } from "react";
 import { addLocale } from 'primereact/api';
-
+import { usuariosService } from '../services/usuarioService';
+import { useRelatorio } from "../components/context/RelatorioContext";
 
 export default function RelatorioBase(){
     const [form, setForm] = useState({
         data: "",
         filtro: "",
+        usuario: "",
     });
 
     const [mostraResultados, setMostraResultado] = useState(false);
+    const [carregando, setCarregando] = useState(false);
     const [resultado, setResultado] = useState(null);
-    const [loading, setLoading] = useState(false);
+    const [usuarios, setUsuarios] = useState([]);
+    const { gerando, exportarRelatorio } = useRelatorio();
+
+    useEffect(() => {
+        getUsuarios();
+    },[]);
+
+    const formatarDataHora = (valor) => {
+        if (!valor) return 'Não retornado';
+        const data = new Date(valor);
+        if (isNaN(data.getTime())) return 'Não retornado';
+        return data.toLocaleString('pt-BR', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+        });
+    };
 
     // Config Calendario
     addLocale('pt-BR', {
@@ -78,19 +101,28 @@ export default function RelatorioBase(){
     ],
     today: 'Hoje',
     clear: 'Limpar'
-});
+    });
 
     async function buscarRelatorio(e) {
         e.preventDefault();
 
-        //Dados de filtro e data 
+        const intervalo = (form.data ?? []).filter(Boolean);
+        if (intervalo.length < 2) {
+            console.log('Selecione um intervalo de datas completo.');
+            return;
+        }
+
+        //Dados de filtro e data
         const data = {
-            data: form.data.map(d => d.toISOString()),
-            filtro: form.filtro
+            data: intervalo.map(d => d.toISOString()),
+            filtro: form.filtro,
+            usuario: form.usuario,
         };
 
         try {
             setMostraResultado(true);
+            setCarregando(true);
+            setResultado(null);
             const response = await relatorioService.getTicketsChat(data);
 
             if (response.status == 200) {
@@ -98,51 +130,26 @@ export default function RelatorioBase(){
             }
         } catch (err) {
             console.log('erros: ', err);
+        } finally {
+            setCarregando(false);
         }
     }
 
-    async function exportarRelatorio(dados, tipo) {
-            const data = {
-                data: form.data.map(d => d.toISOString()),
-                filtro: form.filtro,
-                tipo: tipo,
+    async function getUsuarios(){
+        try {
+            const response = await usuariosService.list();
+
+            if (response.status == 200) {
+                setUsuarios(response.data.data);
             }
-
-            const response = await relatorioService.exportarRelatorio(data);
-
-            const mimeType = {
-                excel: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                pdf: 'application/pdf'
-            };
-
-
-            const extensao = {
-                excel: 'xlsx',
-                pdf: 'pdf'
-            };
-
-            const blob = new Blob([
-                response.data
-            ], {
-                type: mimeType[tipo]
-            });
-
-            const url = window.URL.createObjectURL(blob);
-
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `relatorio.${extensao[tipo]}`;
-
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
-
-            window.URL.revokeObjectURL(url);
+        } catch (err) {
+            console.log('erros: ', err);
+        }
     }
 
     return (
-        <div className="relatorio-base-page">
-            <div className="min-h-screen bg-gray-50">
+        <div className="relatorio-base-page h-full">
+            <div className="h-full overflow-y-auto bg-gray-50">
                 <div className="mx-auto w-full max-w-2xl px-6 p-6">
                     <div className="mb-6">
                         <h1 className="text-2xl font-semibold">Relatório</h1>
@@ -176,7 +183,11 @@ export default function RelatorioBase(){
                                     name={'filtro'}
                                     label={'Filtro:'}
                                     value={form.filtro}
-                                    onChange={(e) => setForm({ filtro: e.value, data: form.data})}
+                                    onChange={(e) => setForm(prev => ({
+                                        ...prev,
+                                        filtro: e.value, data: form.data
+                                        }))
+                                    }
                                     options={[
                                         {value: "1", label: "Chats WhatsApp"},
                                     ]}
@@ -184,13 +195,29 @@ export default function RelatorioBase(){
                                 />
                             </div>
                             <div className="mx-auto mt-4 mb-2">
-                                <InputField
+                                <Select
+                                    name={'usuario'}
                                     label={'Usuário'}
-                                    id='nomeUsuario'
+                                    value={form.usuario} 
+                                    optionLabel="nome" 
+                                    optionValue="id"
+                                    showClear={true}
+                                    onChange={(e) =>
+                                        setForm(prev => ({
+                                            ...prev,
+                                            usuario: e.value
+                                        }))
+                                    }
+                                    options={usuarios}
                                     placeholder={'Digite o nome do usuário'}
-                                    className='h-14'
-                                    type='text'
-                                    inputClassName='text-base'
+                                    selectClassName="
+                                        h-[38px] 
+                                        border
+                                        border-gray-300
+                                        hover:bg-gray-100
+                                        focus-within:ring-2
+                                        focus-within:ring-green-500
+                                "
                                 />
                             </div>
 
@@ -221,21 +248,44 @@ export default function RelatorioBase(){
                                 <div className="gap-2 flex">
                                     <Button
                                         icon={<TableCellsIcon  className="h-5 w-5"/>}
-                                        text={'Excel'}
+                                        text={gerando ? 'Gerando...' : 'Excel'}
+                                        disabled={gerando}
                                         buttonClassName="rounded-2xl p-1.5 bg-blue-300 hover:bg-blue-500"
-                                        onClick={() => exportarRelatorio(resultado, 'excel')}
+                                        onClick={() => exportarRelatorio(form, 'excel')}
                                     />
                                     <Button
                                         icon={<DocumentIcon  className="h-5 w-5"/>}
-                                        text={'PDF'}
+                                        text={gerando ? 'Gerando...' : 'PDF'}
+                                        disabled={gerando}
                                         buttonClassName="rounded-2xl p-1.5 bg-green-400"
-                                        onClick={() => exportarRelatorio(resultado, 'pdf')}
+                                        onClick={() => exportarRelatorio(form, 'pdf')}
                                     />
                                 </div>
                             </div>
                         
-                        <div className="" id="tickets">
-                        {resultado ? (
+                        <div className="max-h-80 overflow-y-auto" id="tickets">
+                        {carregando ? (
+                            Array.from({ length: 3 }).map((_, i) => (
+                            <div className="rounded-xl border m-4 p-3 bg-white shadow-md" key={`skeleton-${i}`}>
+                                <div className="flex flex-cols gap-4 items-center">
+                                    <Skeleton width="3rem" height="0.75rem" />
+                                    <Skeleton width="4rem" height="1.5rem" borderRadius="0.75rem" />
+                                </div>
+                                <div className="mt-2">
+                                    <Skeleton width="70%" height="1.25rem" />
+                                </div>
+                                <div className="mt-2">
+                                    <Skeleton width="50%" height="0.875rem" />
+                                </div>
+                                <div className="mt-1">
+                                    <Skeleton width="50%" height="0.875rem" />
+                                </div>
+                                <div className="mt-1">
+                                    <Skeleton width="40%" height="0.875rem" />
+                                </div>
+                            </div>
+                            ))
+                        ) : resultado && resultado.length > 0 ? (
                             resultado.map(ticket =>(
                             <div id="dataTicket" className="rounded-xl border m-4 p-3 bg-white shadow-md" key={ticket.id}>
                                 <div className="flex flex-cols gap-4">
@@ -256,13 +306,13 @@ export default function RelatorioBase(){
                                     <h1 id="analistaTicket" className="text-gray-500 text-sm">Responsavel: {ticket.owner?.businessName ?? 'Não retornado'}</h1>
                                 </div>
                                 <div id="divData">
-                                    <h1 id="dataTicket" className="text-gray-500 text-sm">Data/Hora: {ticket.resolvedIn}</h1>
+                                    <h1 id="dataTicket" className="text-gray-500 text-sm">Data/Hora: {formatarDataHora(ticket.resolvedIn)}</h1>
                                 </div>
                                 </div>
                             ))
-                        )
-                         : <h1>Nao encontrado</h1>
-                        }
+                        ) : (
+                            <h1>Nao encontrado</h1>
+                        )}
                         </div>
                         </section>
                         )}

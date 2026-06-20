@@ -7,13 +7,17 @@ import echo from "../../services/echo";
 import { notificacaoService } from "../../services/notificacaoService";
 import { useToast } from "../context/ToastContext";
 import { motion, AnimatePresence } from "motion/react";
+import somNotificacao from "../../assets/sounds/notificacao.mp3";
+import { useAuthStore } from "../../stores/authStore";
 
 export function Notificacao() {
     const op = useRef(null);
+    const audioRef = useRef(new Audio(somNotificacao));
     const [notificacoes, setNotificacoes] = useState([]);
     const [erro, setErro] = useState();
     const qtdeNotificacoes = notificacoes.filter(n => !n.lida_em).length;
     const { showToast } = useToast();
+    const userId = useAuthStore((state) => state.user?.id);
     const panelVariants = {
     hidden: {
         opacity: 0,
@@ -75,6 +79,24 @@ const notificationVariants = {
         }
     }
 
+    async function marcarTodasComoLidas(){
+        try{
+            if(qtdeNotificacoes === 0){
+                return;
+            }
+
+            const response = await notificacaoService.lerTodas();
+
+            if(response.status == 200 && response.data.success){
+                carregarNotificacoes();
+            }
+
+        }catch(err){
+            setErro(err);
+            console.log(err);
+        }
+    }
+
     async function removeNotificacao(notificacao){
         try{
             const idNotificacao = notificacao.id;
@@ -106,25 +128,33 @@ const notificationVariants = {
 
     useEffect(() => {
 
-    carregarNotificacoes();
+        carregarNotificacoes();
 
-        //Ajstar depois para private e para ecutar o usuário da sessão
-        echo.channel('usuario.1')
+        if (!userId) return;
+
+        echo.private(`usuario.${userId}`)
             .listen('.notificacao.criada', (e) => {
                 setNotificacoes(prev => [
                     e,
                     ...prev
                 ]);
 
+                const exibeNotificacoes = useAuthStore.getState().user?.exibeNotificacoes;
+                if (!exibeNotificacoes) return;
+
+                audioRef.current.currentTime = 0;
+                audioRef.current.play().catch(err => console.warn('Não foi possível tocar o som', err));
+
                 showToast('info', 'Nova Notificação', 'Notificação adicionada');
             });
 
         return () => {
-            echo.leave('usuario.1');
-        };}, []);
+            echo.leave(`usuario.${userId}`);
+        };
+    }, [userId]);
 
     return (
-        <div className="flex justify-end pr-4 pt-4">
+        <div className="flex justify-end pr-4 pt-4 bg-gray-50">
             <Button
                 variant="none"
                 buttonClassName="p-overlay-badge relative p-0"
@@ -153,7 +183,11 @@ const notificationVariants = {
                 Notificações
             </h2>
 
-            <button className="text-xs font-medium text-gray-600 hover:text-black transition">
+            <button
+                onClick={marcarTodasComoLidas}
+                disabled={qtdeNotificacoes === 0}
+                className="text-xs font-medium text-gray-600 hover:text-black transition disabled:opacity-40 disabled:cursor-not-allowed"
+            >
                 ✓ Marcar todas
             </button>
         </div>

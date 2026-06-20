@@ -6,12 +6,19 @@ import AppLayout from "../pages/layouts/AppLayout";
 import Relatorio from "../pages/Relatorio";
 import PrivateRoute from "./AppPrivateRoutes";
 import CadastroUsuarios from "../pages/CadastroUsuarios";
-import Configuracoes from "../pages/Configuracoes";
 import GravaAudio from "../pages/GravaAudio";
+import { LigacaoProvider } from "../components/context/LigacaoContext";
+import { RelatorioProvider } from "../components/context/RelatorioContext";
+import { TitleBar } from "../components/layout/TitleBar";
 
 export default function AppRoutes(){
     return(
+        <div className="flex flex-col h-screen overflow-hidden bg-white">
+        <TitleBar />
+        <div className="flex-1 min-h-0">
         <HashRouter>
+            <LigacaoProvider>
+            <RelatorioProvider>
             <Routes>
                 <Route path="/login" element={
                     <Login/>
@@ -42,13 +49,12 @@ export default function AppRoutes(){
                             <CadastroUsuarios/>
                         </PrivateRoute>
                     }/>
-                    <Route path="/configuracoes" element={
-                        <PrivateRoute>
-                            <Configuracoes/>
-                        </PrivateRoute>
-                    }/>
                 </Route>
             </Routes>
+            </RelatorioProvider>
+            </LigacaoProvider>
         </HashRouter>
+        </div>
+        </div>
     );
 }
